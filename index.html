@@ -59,7 +59,7 @@
         <ul>
           <li class="active"><a href="index.html">Home</a></li>
           <li><a href="#about">About</a></li>
-          <li><a href="../menu.html">Menu</a></li>
+          <li><a href="menu.html">Menu</a></li>
           <li><a href="#specials">Specials</a></li>
           <li><a href="#events">Events</a></li>
           <li><a href="#chefs">Chefs</a></li>
@@ -380,30 +380,30 @@
           <p>Envianos un mensaje para reservas una mesa con anticipación</p>
         </div>
 
-        <form action="forms/book-a-table.php" method="post" role="form" class="php-email-form">
+        <form method="post" id="frmReservaciones" role="form">
           <div class="form-row">
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
+              <input type="text" name="name" class="form-control" id="name" placeholder="Nombre" data-rule="minlen:4" data-msg="Ingrese su nombre">
               <div class="validate"></div>
             </div>
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email">
+              <input type="email" class="form-control" name="email" id="email" placeholder="E-Mail" data-rule="email" data-msg="Ingrese un correo val&iacute;do">
               <div class="validate"></div>
             </div>
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="text" class="form-control" name="phone" id="phone" placeholder="Your Phone" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
+              <input type="text" class="form-control" name="phone" id="phone" placeholder="Tel&eacute;fono" data-rule="minlen:9" data-msg="Ingrese un telefono val&iacute;do">
               <div class="validate"></div>
             </div>
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="text" name="date" class="form-control" id="date" placeholder="Date" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
+              <input type="date" name="date" class="form-control" id="date" placeholder="Fecha Reserva" data-rule="minlen:4" data-msg="Ingrese la fecha de reserva">
               <div class="validate"></div>
             </div>
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="text" class="form-control" name="time" id="time" placeholder="Time" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
+              <input type="time" class="form-control" name="time" id="time" placeholder="Hora" data-rule="minlen:4" data-msg="Seleccione la hora de reserva">
               <div class="validate"></div>
             </div>
             <div class="col-lg-4 col-md-6 form-group">
-              <input type="number" class="form-control" name="people" id="people" placeholder="# of people" data-rule="minlen:1" data-msg="Please enter at least 1 chars">
+              <input type="number" class="form-control" name="people" id="people" placeholder="cantidad de personas" data-rule="minlen:1" data-msg="Ingrese la cantidad de personas">
               <div class="validate"></div>
             </div>
           </div>
@@ -412,11 +412,11 @@
             <div class="validate"></div>
           </div>
           <div class="mb-3">
-            <div class="loading">Cargando</div>
+            <div class="loading d-none">Cargando...</div>
             <div class="error-message"></div>
             <div class="sent-message">Tu reservación ha sido realizada con exito. Gracias!</div>
           </div>
-          <div class="text-center"><button type="submit">Enviar</button></div>
+          <div class="text-center"><button class="btn btn-warning text-white" id="btnReservarMesa" type="button">Enviar</button></div>
         </form>
 
       </div>
@@ -755,6 +755,71 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
+<script>
+$( document ).ready(function() 
+{
+	$( "#btnReservarMesa" ).click(function() 
+	{
+		$('#frmReservaciones')
+		EnviarCorreoReserva();
+		
+	});
+
+	function EnviarCorreoReserva()
+	{
+
+		$.ajax(
+		{
+			
+			type: "POST",
+			url: "../forms/book-a-table.php",
+			data: $("#frmReservaciones").serializeArray()
+			
+		}).done(function(datos)
+		{
+
+			try 
+			{
+				
+				var jsonRespuesta = eval(datos);
+				
+				var intFilasAfectadas = parseInt(jsonRespuesta[0].filas_afectadas);
+				var intContadorError = parseInt(jsonRespuesta[0].error);
+				var strDescripError = jsonRespuesta[0].error_desc;
+				
+				if ((intFilasAfectadas > 0) && (intContadorError == 0))
+				{
+
+				 
+
+				}
+
+			}
+			catch (e) 
+			{
+			
+				new $.Zebra_Dialog('<strong>B&uacute;squeda:</strong><br><br>La b&uacute;squeda ha devuelto el siguiente mensaje:<br><br>' + datos , {
+							'type':     'warning',
+							'title':    'Advertencia'
+				});
+				
+			}
+		
+		}).fail( function(xhr, textStatus, errorThrown) 
+		{
+		
+			new $.Zebra_Dialog('<strong>B&uacute;squeda:</strong><br><br>Se ha detectado un problema:<br><br>responseText: ' + xhr.responseText + '<br>textStatus: ' + textStatus + '<br>errorThrown:' + errorThrown, {
+							'type':     'warning',
+							'title':    'Advertencia'
+			});
+			
+		
+		});
+	}
+
+});
+</script>
 
 </body>
 

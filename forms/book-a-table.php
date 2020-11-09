@@ -1,44 +1,73 @@
 <?php
-  /**
-  * Requires the "PHP Email Form" library
-  * The "PHP Email Form" library is available only in the pro version of the template
-  * The library should be uploaded to: vendor/php-email-form/php-email-form.php
-  * For more info and help: https://bootstrapmade.com/php-email-form/
-  */
+/**
+* Requires the "PHP Email Form" library
+* The "PHP Email Form" library is available only in the pro version of the template
+* The library should be uploaded to: vendor/php-email-form/php-email-form.php
+* For more info and help: https://bootstrapmade.com/php-email-form/
+*/
+// incluir la clase php mailer
+require_once("../assets/vendor/phpmailer/PHPMailerAutoload.php");
 
-  // Replace contact@example.com with your real receiving email address
-  $receiving_email_address = 'dey.fuentes@alumnos.duoc.cl';
+use PHPMailer\PHPMailer\PHPMailer;
 
-  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
-    include( $php_email_form );
-  } else {
-    die( 'Unable to load the "PHP Email Form" Library!');
-  }
+// Create a new PHPMailer instance
+$mail = new PHPMailer;
 
-  $book_a_table = new PHP_Email_Form;
-  $book_a_table->ajax = true;
-  
-  $book_a_table->to = $receiving_email_address;
-  $book_a_table->from_name = $_POST['name'];
-  $book_a_table->from_email = $_POST['email'];
-  $book_a_table->subject = "Han realizado una reserva!";
+$strProtocoloSeguro = "tls";
+$strNombreHost = "smtp.gmail.com";
+$strPuertoHost = "587";
+    
+// Set UTF-8 encoding
+$mail->CharSet = 'UTF-8';			
 
-  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
-  
-  // $book_a_table->smtp = array(
-  //   'host' => 'tls:smtp.gmail.com',
-  //   'username' => 'example',
-  //   'password' => 'pass',
-  //   'port' => '587'
-  // );
+// Tell PHPMailer to use SMTP
+$mail->isSMTP();
 
-  $book_a_table->add_message( $_POST['name'], 'Name');
-  $book_a_table->add_message( $_POST['email'], 'Email');
-  $book_a_table->add_message( $_POST['phone'], 'Phone', 4);
-  $book_a_table->add_message( $_POST['date'], 'Date', 4);
-  $book_a_table->add_message( $_POST['time'], 'Time', 4);
-  $book_a_table->add_message( $_POST['people'], '# of people', 1);
-  $book_a_table->add_message( $_POST['message'], 'Message');
+// Enable SMTP debugging
+// 0 = off (for production use)
+// 1 = client messages
+// 2 = client and server messages			
+$mail->SMTPDebug = 0;
 
-  echo $book_a_table->send();
+// Ask for HTML-friendly debug output
+$mail->Debugoutput = 'html';
+
+// Whether to use SMTP authentication
+$mail->SMTPAuth = true;
+
+// Set the encryption system to use - ssl (deprecated) or tls
+$mail->SMTPSecure = $strProtocoloSeguro;
+
+// Set the hostname of the mail server
+$mail->Host = $strNombreHost;
+
+// Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
+$mail->Port = $strPuertoHost;
+
+$strMensajeRecepFinal = "Mesa reservada";
+
+$strMensajeRecepFinal = nl2br($strMensajeRecepFinal);
+			
+$mail->msgHTML($strMensajeRecepFinal);
+
+// Replace the plain text body with one created manually
+$mail->AltBody = "Para ver el mensaje debe utilizar un cliente de correo compatible con HTML.";
+
+//
+// Send the message, check for errors
+//
+
+if ($mail->send())
+{
+
+  echo json_encode(array("filas_afectadas" => 1, "error" => 0, "error_desc" => ""));
+  //Se cierra la conexion para evitar posibles reenvios de correo
+  $mail->smtpClose();
+
+}
+else
+{
+  echo json_encode(array("filas_afectadas" => 0, "error" => 1, "error_desc" => "No se ha podido enviar la reserva, intentelo mas tarde"));
+}
+
 ?>
